@@ -15,3 +15,9 @@ This document tracks all design and technical decisions made during the build.
 - **Vercel deployment setup:** Added `"web"` configuration in `app.json`, installed `@expo/metro-runtime`, `react-dom`, and `react-native-web`, added `build` script in `package.json`, and created `vercel.json` for zero-configuration Vercel deployment.
 - **Reanimated & Test Setup for React 19:** Configured `jest.setup.js` with `react-native-reanimated` mock, Lucide icon proxy mock, and async test-renderer compatibility for `@testing-library/react-native` v14.
 
+## Phase 3 Decisions
+- **ScrollView wrapper for Welcome:** Wrapped the Welcome fridge in a `ScrollView` (bounces off) to gracefully handle very small devices (< 667 pt height) without content clipping, while still feeling fridge-like on standard sizes.
+- **Compartment panel transition = scale 0.985 + haptic (not shared-element expansion):** Shared-element expansion with Reanimated Layout requires a development build. The UIUX Section 8 spec explicitly allows a fade-with-scale fallback; scale 0.985 is implemented and looks faithful. Recorded here per Kickoff Section 5.
+- **`StyleSheet.absoluteFill` not `absoluteFillObject`:** RN 0.88 with the new TypeScript typegen removed `absoluteFillObject` from the `StyleSheet` type; `absoluteFill` (a StyleProp spread) is the correct equivalent.
+- **`react-native-svg` mock completeness:** Added all 20+ SVG element mocks (`Path`, `Circle`, `G`, `ClipPath`, etc.) to `jest.setup.js` because the Phase 3 `SproutLogo` component introduces `Path` which was absent from the Phase 2 mock, causing test failures.
+- **Dev menu via long-press on wordmark:** Long-press (500 ms delay) on the compact header wordmark opens an action sheet (iOS) / Alert (Android+Web) offering seed, clear, and gallery actions; invisible in production builds.

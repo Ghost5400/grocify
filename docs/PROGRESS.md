@@ -1,7 +1,7 @@
 # GROCIFY — Progress Log
 
-**Current Phase:** Phase 2 — Design System & Shared Components (Completed)
-**Next Phase:** Phase 3 — Welcome and Fridge Home
+**Current Phase:** Phase 3 — Welcome and Fridge Home (Completed)
+**Next Phase:** Phase 4 — Compartment Inventory
 
 ## Completed Tasks
 - [x] Phase 1 Task 1.1: Reorganize project docs into `docs/` and reference assets into `docs/reference/`.
@@ -28,4 +28,15 @@
 - [x] Phase 2 Task 2.7: Configure Vercel static web deployment (`vercel.json`, `app.json` web config, `@expo/metro-runtime`, `react-dom`, `react-native-web`, `build` script).
 - [x] Phase 2 Task 2.8: Write and pass unit tests for `QuantityStepper`, `StatusBadge`, `DateField`, and `PrimaryButton` (total 8 test suites, 54 tests passing).
 - [x] Phase 2 Task 2.9: Verify `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_2_REPORT.md` and tag repository `phase-2`.
+- [x] Phase 3 Task 3.1: Implement `SproutLogo` and `GrocifyWordmark` (large + compact) with code-drawn SVG two-leaf sprout (`src/components/common/SproutLogo.tsx`).
+- [x] Phase 3 Task 3.2: Implement `WelcomeFridge` — layered code-drawn retro two-door blue fridge with gradients, sheen, handles, seam, and feet (`src/components/welcome/WelcomeFridge.tsx`).
+- [x] Phase 3 Task 3.3: Implement full Welcome screen (`app/index.tsx`) with 450 ms scale+fade transition, `useReducedMotion` support, and safe area handling.
+- [x] Phase 3 Task 3.4: Implement `FridgeHeader` — 48 pt compact header with leaf wordmark, singular/plural count chip, and + button (`src/components/fridge/FridgeHeader.tsx`).
+- [x] Phase 3 Task 3.5: Implement `ShelfPreview` — up to 6 bottom-aligned item images with contact shadows and empty state (`src/components/fridge/ShelfPreview.tsx`).
+- [x] Phase 3 Task 3.6: Implement `CompartmentPanel` — themed gradient panel with LightStrip, ScreenHeader pill, ShelfPreview, and 0.985 press scale + haptic (`src/components/fridge/CompartmentPanel.tsx`).
+- [x] Phase 3 Task 3.7: Implement full Fridge Home screen (`app/fridge.tsx`) — silver-rimmed fridge body, three stacked compartment panels, glass dividers, FridgeBase, live item counts from store.
+- [x] Phase 3 Task 3.8: Implement `getSampleItems()` dev helper and long-press dev menu (load/clear/gallery) with `__DEV__` guard (`src/data/sampleData.ts`).
+- [x] Phase 3 Task 3.9: Fix `react-native-svg` mock (add `Path`, all SVG elements) and add `runOnJS` to Reanimated mock in `jest.setup.js`.
+- [x] Phase 3 Task 3.10: Write and pass unit tests for `FridgeHeader` (5 tests) and `ShelfPreview` (3 tests); total 10 suites, 65+ tests.
+- [x] Phase 3 Task 3.11: Verify `npm run typecheck`, `npm run lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_3_REPORT.md` and tag repository `phase-3`.
 

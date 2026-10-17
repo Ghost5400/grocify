@@ -1,149 +1,233 @@
 // app/fridge.tsx
-// Fridge Home screen (Phase 1 Placeholder).
+// Virtual Fridge Home screen per UIUX.md Section 6 and reference images.
 
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActionSheetIOS,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { COMPARTMENT_LIST } from '@/data/compartments';
-import { selectTotalCount, useFridgeStore } from '@/store/fridgeStore';
-import { colors, compartmentTheme, radius, spacing, typography } from '@/theme/tokens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  CompartmentPanel,
+  FridgeBase,
+  FridgeHeader,
+} from '@/components';
+import { getSampleItems } from '@/data/sampleData';
+import { CompartmentId } from '@/domain/types';
+import {
+  selectItemsByCompartment,
+  selectTotalCount,
+  useFridgeStore,
+} from '@/store/fridgeStore';
+import { colors, elevation, radius, spacing } from '@/theme/tokens';
 
 export default function FridgeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const items = useFridgeStore((state) => state.items);
+  const resetAllForDev = useFridgeStore((state) => state.resetAllForDev);
+  const seedSampleItemsForDev = useFridgeStore((state) => state.seedSampleItemsForDev);
+
   const totalCount = selectTotalCount(items);
+  const freezerItems = selectItemsByCompartment(items, 'freezer');
+  const packedItems = selectItemsByCompartment(items, 'packed');
+  const veggiesItems = selectItemsByCompartment(items, 'veggies');
+
+  const handleOpenCompartment = (id: CompartmentId) => {
+    router.push(`/compartment/${id}`);
+  };
+
+  const handlePressAdd = () => {
+    router.push('/add/pick');
+  };
+
+  const handleDevMenu = () => {
+    if (!__DEV__) return;
+
+    const options = [
+      'Load Sample Data (UIUX Sec 6)',
+      'Clear All Data',
+      'Open Component Gallery',
+      'Cancel',
+    ];
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: 3,
+          destructiveButtonIndex: 1,
+          title: 'GROCIFY Dev Tools',
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) {
+            seedSampleItemsForDev(getSampleItems());
+          } else if (buttonIndex === 1) {
+            resetAllForDev();
+          } else if (buttonIndex === 2) {
+            router.push('/_dev/gallery');
+          }
+        }
+      );
+    } else {
+      Alert.alert(
+        'GROCIFY Dev Tools',
+        'Choose a development helper action:',
+        [
+          {
+            text: 'Load Sample Data',
+            onPress: () => seedSampleItemsForDev(getSampleItems()),
+          },
+          {
+            text: 'Clear All Data',
+            style: 'destructive',
+            onPress: () => resetAllForDev(),
+          },
+          {
+            text: 'Component Gallery',
+            onPress: () => router.push('/_dev/gallery'),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    }
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.title, typography.titleLg]}>GROCIFY Fridge</Text>
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, typography.label]}>
-            {totalCount} {totalCount === 1 ? 'item' : 'items'}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={[styles.helper, typography.body]}>
-        Tap a compartment or press Add to test routing:
-      </Text>
-
-      {COMPARTMENT_LIST.map((comp) => {
-        const theme = compartmentTheme[comp.id];
-        return (
-          <TouchableOpacity
-            key={comp.id}
-            style={[styles.compartmentCard, { backgroundColor: theme.surface, borderColor: theme.tint }]}
-            onPress={() => router.push(`/compartment/${comp.id}` as any)}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${comp.name}`}
-          >
-            <View style={[styles.iconCircle, { backgroundColor: theme.accent }]}>
-              <Text style={styles.iconText}>{comp.icon === 'snowflake' ? '❄' : comp.icon === 'package' ? '📦' : '🥬'}</Text>
-            </View>
-            <Text style={[styles.compartmentName, typography.titleMd, { color: theme.ink }]}>
-              {comp.name}
-            </Text>
-            <Text style={[styles.chevron, { color: theme.ink }]}>›</Text>
-          </TouchableOpacity>
-        );
-      })}
-
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => router.push('/add/pick' as any)}
-        accessibilityRole="button"
-        accessibilityLabel="Add item"
+    <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContainer,
+          {
+            paddingTop: Math.max(insets.top, spacing.xs),
+            paddingBottom: Math.max(insets.bottom + spacing.sm, spacing.xl),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        <Text style={[styles.addButtonText, typography.button]}>+ Add Grocery Item</Text>
-      </TouchableOpacity>
+        {/* Compact Header (48 pt) */}
+        <FridgeHeader
+          totalCount={totalCount}
+          onPressAdd={handlePressAdd}
+          onLongPressWordmark={handleDevMenu}
+        />
 
-      {__DEV__ && (
-        <TouchableOpacity
-          style={styles.devButton}
-          onPress={() => router.push('/_dev/gallery' as any)}
-        >
-          <Text style={[styles.devButtonText, typography.caption]}>[DEV] Component Gallery</Text>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
+        {/* Outer Fridge Frame with 6 pt Silver Rim */}
+        <View style={styles.fridgeFrameContainer}>
+          <View style={[styles.outerRim, elevation.elevFridge]}>
+            {/* 1 pt inner white highlight ring */}
+            <View style={styles.innerHighlightRing} pointerEvents="none" />
+
+            {/* Stacked Compartments */}
+            <View style={styles.compartmentsStack}>
+              {/* 1. Freezer Compartment */}
+              <CompartmentPanel
+                compartment="freezer"
+                name="Freezer"
+                items={freezerItems}
+                onPress={() => handleOpenCompartment('freezer')}
+                isFirst={true}
+              />
+
+              {/* 6 pt Glass Divider */}
+              <View style={styles.glassDivider} pointerEvents="none">
+                <View style={styles.dividerTopLine} />
+                <View style={styles.dividerBase} />
+              </View>
+
+              {/* 2. Packed & Miscellaneous Compartment */}
+              <CompartmentPanel
+                compartment="packed"
+                name="Packed & Misc"
+                items={packedItems}
+                onPress={() => handleOpenCompartment('packed')}
+              />
+
+              {/* 6 pt Glass Divider */}
+              <View style={styles.glassDivider} pointerEvents="none">
+                <View style={styles.dividerTopLine} />
+                <View style={styles.dividerBase} />
+              </View>
+
+              {/* 3. Veggies Compartment */}
+              <CompartmentPanel
+                compartment="veggies"
+                name="Veggies"
+                items={veggiesItems}
+                onPress={() => handleOpenCompartment('veggies')}
+              />
+            </View>
+
+            {/* Fridge Base with Grille and Feet */}
+            <FridgeBase />
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: spacing.xl,
-    paddingTop: spacing.huge,
+  screen: {
+    flex: 1,
     backgroundColor: colors.canvas,
+  },
+  scrollContainer: {
     flexGrow: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  title: {
-    color: colors.brand.logo,
-  },
-  badge: {
-    backgroundColor: colors.field.bg,
-    borderColor: colors.field.border,
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-  },
-  badgeText: {
-    color: colors.ink.title,
-  },
-  helper: {
-    color: colors.ink.slateSoft,
-    marginBottom: spacing.xl,
-  },
-  compartmentCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    marginBottom: spacing.md,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  iconText: {
-    fontSize: 20,
-    color: colors.white,
-  },
-  compartmentName: {
+  fridgeFrameContainer: {
+    paddingHorizontal: 12,
+    marginTop: spacing.xs,
     flex: 1,
   },
-  chevron: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  outerRim: {
+    borderRadius: radius.xl, // 28
+    borderWidth: 6,
+    borderTopColor: colors.rim.light,
+    borderLeftColor: colors.rim.base,
+    borderRightColor: colors.rim.base,
+    borderBottomColor: colors.rim.shadow,
+    backgroundColor: colors.canvas,
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: 640,
   },
-  addButton: {
-    backgroundColor: colors.brand.forest,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.xl,
-    alignItems: 'center',
-    marginTop: spacing.lg,
+  innerHighlightRing: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: radius.xl - 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
+    margin: 1,
+    zIndex: 10,
   },
-  addButtonText: {
-    color: colors.white,
+  compartmentsStack: {
+    flex: 1,
+    width: '100%',
   },
-  devButton: {
-    marginTop: spacing.xl,
-    alignItems: 'center',
-    padding: spacing.sm,
+  glassDivider: {
+    height: 6,
+    width: '100%',
+    backgroundColor: colors.rim.base,
+    position: 'relative',
   },
-  devButtonText: {
-    color: colors.ink.helper,
+  dividerTopLine: {
+    height: 1.5,
+    width: '100%',
+    backgroundColor: colors.rim.light,
+  },
+  dividerBase: {
+    height: 4.5,
+    width: '100%',
+    backgroundColor: 'rgba(201, 208, 208, 0.85)',
   },
 });

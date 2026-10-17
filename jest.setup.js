@@ -16,9 +16,10 @@ jest.mock('react-native-reanimated', () => {
     },
     useSharedValue: (init) => ({ value: init }),
     useAnimatedStyle: (fn) => fn(),
-    withTiming: (toValue) => toValue,
+    withTiming: (toValue, _opts, cb) => { if (cb) cb(true); return toValue; },
     withSpring: (toValue) => toValue,
     withSequence: (...args) => args[0],
+    runOnJS: (fn) => fn,
     Easing: {
       bezier: () => () => 0,
       linear: () => 0,
@@ -50,26 +51,33 @@ jest.mock('lucide-react-native', () => {
 jest.mock('react-native-svg', () => {
   const React = require('react');
   const { View } = require('react-native');
+  const svgEl = (name) =>
+    function SvgElement(props) {
+      return React.createElement(View, { testID: props.testID || `svg-${name}` });
+    };
   return {
     __esModule: true,
-    default: function SvgMock(props) {
-      return React.createElement(View, props);
-    },
-    Svg: function SvgMock(props) {
-      return React.createElement(View, props);
-    },
-    Defs: function DefsMock(props) {
-      return React.createElement(View, props);
-    },
-    LinearGradient: function LinearGradientMock(props) {
-      return React.createElement(View, props);
-    },
-    Stop: function StopMock(props) {
-      return React.createElement(View, props);
-    },
-    Rect: function RectMock(props) {
-      return React.createElement(View, props);
-    },
+    default: svgEl('Svg'),
+    Svg: svgEl('Svg'),
+    Path: svgEl('Path'),
+    Circle: svgEl('Circle'),
+    Ellipse: svgEl('Ellipse'),
+    Line: svgEl('Line'),
+    Polygon: svgEl('Polygon'),
+    Polyline: svgEl('Polyline'),
+    Rect: svgEl('Rect'),
+    G: svgEl('G'),
+    Text: svgEl('Text'),
+    Use: svgEl('Use'),
+    Image: svgEl('Image'),
+    Symbol: svgEl('Symbol'),
+    Defs: svgEl('Defs'),
+    LinearGradient: svgEl('LinearGradient'),
+    RadialGradient: svgEl('RadialGradient'),
+    Stop: svgEl('Stop'),
+    ClipPath: svgEl('ClipPath'),
+    Pattern: svgEl('Pattern'),
+    Mask: svgEl('Mask'),
   };
 });
 

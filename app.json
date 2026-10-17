@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "GROCIFY",
+    "slug": "grocify",
+    "scheme": "grocify",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ghost5400.grocify",
+      "infoPlist": {
+        "UIUserInterfaceStyle": "Light"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F2EADC",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "package": "com.ghost5400.grocify",
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F2EADC",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4A7753",
+          "defaultChannel": "expiry-reminders"
+        }
+      ]
+    ]
+  }
+}

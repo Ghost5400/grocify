@@ -1,7 +1,7 @@
 # GROCIFY — Progress Log
 
-**Current Phase:** Phase 1 — Foundation (Completed)
-**Next Phase:** Phase 2 — Design System & Shared Components
+**Current Phase:** Phase 2 — Design System & Shared Components (Completed)
+**Next Phase:** Phase 3 — Welcome and Fridge Home
 
 ## Completed Tasks
 - [x] Phase 1 Task 1.1: Reorganize project docs into `docs/` and reference assets into `docs/reference/`.
@@ -19,3 +19,13 @@
 - [x] Phase 1 Task 1.12: Write and run full Jest test suite (4 suites, 35 tests covering domain logic, reminders, date formatting, and store actions/selectors).
 - [x] Phase 1 Task 1.13: Verify `npm run lint`, `npm run typecheck`, `npm test`, and `npx expo-doctor` all pass with 0 errors.
 - [x] Phase 1 Task 1.14: Compile `docs/PHASE_REPORTS/PHASE_1_REPORT.md` and tag repository `phase-1`.
+- [x] Phase 2 Task 2.1: Implement animation and accessibility hooks `useReducedMotion` and `usePressScale`.
+- [x] Phase 2 Task 2.2: Implement structural appliance components `CompartmentIconCircle`, `LightStrip`, `GlassShelf`, `FridgeFrame`, and `FridgeBase`.
+- [x] Phase 2 Task 2.3: Implement button components `PrimaryButton` (arrow & check variants, disabled states, SVG gradient), `WelcomeCta`, and `TextButton`.
+- [x] Phase 2 Task 2.4: Implement input controls `QuantityStepper` (clamped 1-99, animated cross-fade, light haptics), `DateField` (iOS bottom sheet, Android native dialog, Web date input, error states), and `NamePill`.
+- [x] Phase 2 Task 2.5: Implement presentation components `StatusBadge`, `ItemImage`, `ItemRow`, `EmptyState`, and `ScreenHeader`.
+- [x] Phase 2 Task 2.6: Implement interactive dev-only component gallery route `app/_dev/gallery.tsx` with compartment switcher for Freezer, Packed & Misc, and Veggies.
+- [x] Phase 2 Task 2.7: Configure Vercel static web deployment (`vercel.json`, `app.json` web config, `@expo/metro-runtime`, `react-dom`, `react-native-web`, `build` script).
+- [x] Phase 2 Task 2.8: Write and pass unit tests for `QuantityStepper`, `StatusBadge`, `DateField`, and `PrimaryButton` (total 8 test suites, 54 tests passing).
+- [x] Phase 2 Task 2.9: Verify `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_2_REPORT.md` and tag repository `phase-2`.
+

@@ -2,7 +2,7 @@
 // Fallback placeholder rendering the first letter of the item in its compartment tint.
 
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { CompartmentId } from '../domain/types';
 import { compartmentTheme, fontNames, radius } from '../theme/tokens';
 
@@ -10,12 +10,14 @@ interface ItemImagePlaceholderProps {
   name: string;
   compartment?: CompartmentId;
   size?: number;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const ItemImagePlaceholder: React.FC<ItemImagePlaceholderProps> = ({
   name,
   compartment = 'veggies',
   size = 64,
+  style,
 }) => {
   const theme = compartmentTheme[compartment];
   const initial = (name.trim().charAt(0) || '?').toUpperCase();
@@ -31,6 +33,7 @@ export const ItemImagePlaceholder: React.FC<ItemImagePlaceholderProps> = ({
           backgroundColor: theme.tint,
           borderColor: theme.accent,
         },
+        style,
       ]}
       accessibilityRole="image"
       accessibilityLabel={`Placeholder image for ${name}`}

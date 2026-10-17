@@ -1,7 +1,7 @@
 // src/components/fridge/CompartmentPanel.tsx
 // Stacked fridge compartment panel per UIUX.md Section 6.
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Platform,
   Pressable,
@@ -10,7 +10,12 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { LightStrip } from '@/components/LightStrip';
@@ -26,6 +31,7 @@ export interface CompartmentPanelProps {
   items: Item[];
   onPress: () => void;
   isFirst?: boolean;
+  isHighlighted?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -36,6 +42,7 @@ export function CompartmentPanel({
   items,
   onPress,
   isFirst = false,
+  isHighlighted = false,
   style,
   testID,
 }: CompartmentPanelProps) {
@@ -46,6 +53,22 @@ export function CompartmentPanel({
     inDuration: 90,
     outDuration: 120,
   });
+
+  // Soft glow pulse (accent 0 -> 40% -> 0 over 600 ms) per UIUX Section 8
+  const glowOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    if (isHighlighted) {
+      glowOpacity.value = withSequence(
+        withTiming(0.4, { duration: 300 }),
+        withTiming(0, { duration: 300 })
+      );
+    }
+  }, [isHighlighted, glowOpacity]);
+
+  const glowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
 
   const handlePress = () => {
     if (Platform.OS !== 'web') {
@@ -58,6 +81,7 @@ export function CompartmentPanel({
 
   return (
     <Animated.View style={[styles.wrapper, animatedStyle, style]}>
+
       <Pressable
         testID={testID ?? `compartment-panel-${compartment}`}
         onPress={handlePress}
@@ -130,6 +154,22 @@ export function CompartmentPanel({
         <View style={styles.shelfArea} pointerEvents="none">
           <ShelfPreview compartment={compartment} items={items} />
         </View>
+
+        {/* Soft Accent Glow Pulse Overlay on Item Added */}
+        <Animated.View
+          style={[
+            styles.glowOverlay,
+            {
+              backgroundColor: theme.accent,
+              borderTopLeftRadius: topCornerRadius,
+              borderTopRightRadius: topCornerRadius,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+            },
+            glowAnimatedStyle,
+          ]}
+          pointerEvents="none"
+        />
       </Pressable>
     </Animated.View>
   );
@@ -141,6 +181,11 @@ const styles = StyleSheet.create({
     minHeight: 180,
     width: '100%',
   },
+  glowOverlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 15,
+  },
+
   panel: {
     flex: 1,
     width: '100%',

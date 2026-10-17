@@ -1,7 +1,7 @@
 // app/fridge.tsx
 // Virtual Fridge Home screen per UIUX.md Section 6 and reference images.
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
@@ -10,7 +10,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CompartmentPanel,
@@ -29,6 +29,18 @@ import { colors, elevation, radius, spacing } from '@/theme/tokens';
 export default function FridgeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ justAdded?: CompartmentId }>();
+  const [highlightedCompartment, setHighlightedCompartment] = useState<CompartmentId | null>(null);
+
+  useEffect(() => {
+    if (params.justAdded) {
+      setHighlightedCompartment(params.justAdded);
+      const timer = setTimeout(() => {
+        setHighlightedCompartment(null);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [params.justAdded]);
 
   const items = useFridgeStore((state) => state.items);
   const resetAllForDev = useFridgeStore((state) => state.resetAllForDev);
@@ -38,6 +50,7 @@ export default function FridgeScreen() {
   const freezerItems = selectItemsByCompartment(items, 'freezer');
   const packedItems = selectItemsByCompartment(items, 'packed');
   const veggiesItems = selectItemsByCompartment(items, 'veggies');
+
 
   const handleOpenCompartment = (id: CompartmentId) => {
     router.push(`/compartment/${id}`);
@@ -137,6 +150,7 @@ export default function FridgeScreen() {
                 items={freezerItems}
                 onPress={() => handleOpenCompartment('freezer')}
                 isFirst={true}
+                isHighlighted={highlightedCompartment === 'freezer'}
               />
 
               {/* 6 pt Glass Divider */}
@@ -151,6 +165,7 @@ export default function FridgeScreen() {
                 name="Packed & Misc"
                 items={packedItems}
                 onPress={() => handleOpenCompartment('packed')}
+                isHighlighted={highlightedCompartment === 'packed'}
               />
 
               {/* 6 pt Glass Divider */}
@@ -165,7 +180,9 @@ export default function FridgeScreen() {
                 name="Veggies"
                 items={veggiesItems}
                 onPress={() => handleOpenCompartment('veggies')}
+                isHighlighted={highlightedCompartment === 'veggies'}
               />
+
             </View>
 
             {/* Fridge Base with Grille and Feet */}

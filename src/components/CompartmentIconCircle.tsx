@@ -7,7 +7,7 @@ import { compartmentTheme, radius } from '@/theme/tokens';
 
 export interface CompartmentIconCircleProps {
   compartment: CompartmentId;
-  size?: 44 | 52;
+  size?: 28 | 44 | 52 | number;
 }
 
 export function CompartmentIconCircle({
@@ -15,7 +15,8 @@ export function CompartmentIconCircle({
   size = 44,
 }: CompartmentIconCircleProps) {
   const theme = compartmentTheme[compartment];
-  const iconSize = size === 52 ? 26 : 22;
+  const iconSize = size <= 28 ? 16 : size >= 52 ? 26 : 22;
+
 
   const renderIcon = () => {
     switch (compartment) {

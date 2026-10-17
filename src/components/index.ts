@@ -17,9 +17,11 @@ export * from './ItemImage';
 export * from './ItemRow';
 export * from './EmptyState';
 
-// Phase 3 components
+// Phase 3 & 4 components
 export * from './common/SproutLogo';
+export * from './common/ItemShowcaseCavity';
 export * from './welcome/WelcomeFridge';
 export * from './fridge/FridgeHeader';
 export * from './fridge/ShelfPreview';
 export * from './fridge/CompartmentPanel';
+

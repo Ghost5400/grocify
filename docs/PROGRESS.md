@@ -1,7 +1,7 @@
 # GROCIFY — Progress Log
 
-**Current Phase:** Phase 3 — Welcome and Fridge Home (Completed)
-**Next Phase:** Phase 4 — Compartment Inventory
+**Current Phase:** Phase 4 — Add Flow (Completed)
+**Next Phase:** Phase 5 — Compartment Inventory Detail
 
 ## Completed Tasks
 - [x] Phase 1 Task 1.1: Reorganize project docs into `docs/` and reference assets into `docs/reference/`.
@@ -39,4 +39,15 @@
 - [x] Phase 3 Task 3.9: Fix `react-native-svg` mock (add `Path`, all SVG elements) and add `runOnJS` to Reanimated mock in `jest.setup.js`.
 - [x] Phase 3 Task 3.10: Write and pass unit tests for `FridgeHeader` (5 tests) and `ShelfPreview` (3 tests); total 10 suites, 65+ tests.
 - [x] Phase 3 Task 3.11: Verify `npm run typecheck`, `npm run lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_3_REPORT.md` and tag repository `phase-3`.
+- [x] Phase 4 Task 4.1: Implement `ItemShowcaseCavity` — recessed SVG gradient cavity with `LightStrip`, back-wall guide lines, glass shelf, and contact-shadowed item image (`src/components/common/ItemShowcaseCavity.tsx`).
+- [x] Phase 4 Task 4.2: Implement `CompartmentChipSelector` — 3-chip selector row for Freezer, Packed & Misc, Veggies with 28 pt icon circles and haptic feedback (`src/features/add-item/CompartmentChipSelector.tsx`).
+- [x] Phase 4 Task 4.3: Implement `ReminderChipGroup` — 4 reminder chips (1 day, 2 days, 3 days, 1 week/7 days) with single-select highlighting (`src/features/add-item/ReminderChipGroup.tsx`).
+- [x] Phase 4 Task 4.4: Implement full Item Picker screen (`app/add/pick.tsx`) — 3-column FlatList catalog grid, compartment chip selector, search field with empty state, draft store update on selection.
+- [x] Phase 4 Task 4.5: Implement full Add Details screen (`app/add/details.tsx`) — reference-matched FridgeFrame, 72 pt header pill, `ItemShowcaseCavity`, `NamePill`, `QuantityStepper`, `DateField`, gated Continue button.
+- [x] Phase 4 Task 4.6: Implement full Confirmation/Review screen (`app/add/review.tsx`) — shortened cavity, summary card with compartment row and expiry date, `StatusBadge`, `ReminderChipGroup`, Add to Fridge save action.
+- [x] Phase 4 Task 4.7: Add `isHighlighted` prop and 600 ms Reanimated accent glow pulse to `CompartmentPanel` (`src/components/fridge/CompartmentPanel.tsx`).
+- [x] Phase 4 Task 4.8: Handle `justAdded` route param in `app/fridge.tsx` to trigger highlight glow pulse on the receiving `CompartmentPanel` after save.
+- [x] Phase 4 Task 4.9: Write and pass all 4 new test suites: `ItemPicker.test.tsx`, `AddDetails.test.tsx`, `Review.test.tsx`, `AddFlowIntegration.test.tsx` — total 14 suites, 79 tests passing.
+- [x] Phase 4 Task 4.10: Fix test infrastructure — add `AsyncStorage` mock, `SafeAreaContext` mock, document React 19 / RNTL v14 `act()` rules (no unawaited `act()` in sync `beforeEach`; store calls outside React tree need no `act()`).
+- [x] Phase 4 Task 4.11: Verify `tsc --noEmit`, `expo lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_4_REPORT.md` and tag repository `phase-4`.
 

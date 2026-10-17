@@ -1,157 +1,232 @@
 // app/add/details.tsx
-// Add Details screen (Phase 1 Placeholder).
+// Add Details screen matching Fridge_Tomato_Add_Item_Screen.png and UIUX.md Section 7.
 
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isBefore, parseISO, startOfDay } from 'date-fns';
+import { DateField } from '@/components/DateField';
+import { FridgeFrame } from '@/components/FridgeFrame';
+import { ItemShowcaseCavity } from '@/components/common/ItemShowcaseCavity';
+import { NamePill } from '@/components/NamePill';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { QuantityStepper } from '@/components/QuantityStepper';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { COMPARTMENTS } from '@/data/compartments';
 import { useDraftStore } from '@/store/draftStore';
-import { colors, compartmentTheme, radius, spacing, typography } from '@/theme/tokens';
-import { getTodayIso } from '@/utils/date';
+import {
+  colors,
+  compartmentTheme,
+  radius,
+  spacing,
+  typography,
+} from '@/theme/tokens';
 
 export default function DetailsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const catalogEntry = useDraftStore((state) => state.catalogEntry);
   const compartment = useDraftStore((state) => state.compartment) || 'veggies';
   const quantity = useDraftStore((state) => state.quantity);
   const expiryDate = useDraftStore((state) => state.expiryDate);
+
   const setQuantity = useDraftStore((state) => state.setQuantity);
   const setExpiryDate = useDraftStore((state) => state.setExpiryDate);
 
   const theme = compartmentTheme[compartment];
+  const compartmentName = COMPARTMENTS[compartment].name;
+  const itemName = catalogEntry?.name || 'Item';
 
-  // Set default mock date for placeholder navigation test if not set
-  React.useEffect(() => {
-    if (!expiryDate) {
-      setExpiryDate(getTodayIso());
+  // Validation: Expiry date required and must not be in the past
+  const isPastDate = expiryDate
+    ? isBefore(startOfDay(parseISO(expiryDate)), startOfDay(new Date()))
+    : false;
+  const isValidDate = Boolean(expiryDate) && !isPastDate;
+
+  const handleContinue = () => {
+    if (isValidDate) {
+      router.push('/add/review');
     }
-  }, [expiryDate, setExpiryDate]);
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }]}>
-      <View style={[styles.header, { backgroundColor: theme.tint }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={[styles.backText, { color: theme.ink }]}>‹ Back</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, typography.titleMd, { color: theme.ink }]}>
-          Add to {compartment.charAt(0).toUpperCase() + compartment.slice(1)}
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.content}>
-        <Text style={[styles.itemName, typography.titleLg, { color: theme.ink }]}>
-          {catalogEntry?.name || 'Item'}
-        </Text>
-
-        <View style={styles.card}>
-          <Text style={[styles.label, typography.label]}>Quantity: {quantity}</Text>
-          <View style={styles.stepperRow}>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => setQuantity(Math.max(1, quantity - 1))}
-            >
-              <Text style={styles.stepBtnText}>−</Text>
-            </TouchableOpacity>
-            <Text style={[styles.stepVal, typography.stepperValue]}>{quantity}</Text>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => setQuantity(Math.min(99, quantity + 1))}
-            >
-              <Text style={styles.stepBtnText}>+</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={[styles.label, typography.label, { marginTop: spacing.lg }]}>
-            Expiry Date: {expiryDate || 'Select Date'}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={() => router.push('/add/review' as any)}
-          accessibilityRole="button"
-          accessibilityLabel="Continue to Review"
+    <View style={styles.screen}>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: Math.max(insets.top, spacing.xs),
+            paddingBottom: Math.max(insets.bottom, spacing.md),
+          },
+        ]}
+      >
+        <FridgeFrame
+          rimWidth={10}
+          insetHorizontal={10}
+          style={styles.frame}
+          innerStyle={[styles.innerFrame, { backgroundColor: theme.surface }]}
         >
-          <Text style={[styles.continueText, typography.button]}>Continue →</Text>
-        </TouchableOpacity>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            {/* 1. Header Pill (72 pt tall) with back chevron, 52 pt icon circle */}
+            <ScreenHeader
+              compartment={compartment}
+              title={`Add to ${compartmentName}`}
+              height={72}
+              circleSize={52}
+              showBack={true}
+              onBack={handleBack}
+              style={styles.headerPill}
+            />
+
+            {/* 2. Showcase Cavity (~258 pt) with interior light gradient, light strip, glass shelf */}
+            <View style={styles.cavityWrapper}>
+              <ItemShowcaseCavity
+                compartment={compartment}
+                itemName={itemName}
+                catalogId={catalogEntry?.id}
+                height={258}
+                imageSize={180}
+              />
+            </View>
+
+            {/* 3. Name Pill (60 pt) with centered item name */}
+            <View style={styles.namePillWrapper}>
+              <NamePill name={itemName} />
+            </View>
+
+
+            {/* 4. Form Panel with Quantity Stepper & Expiry Date Field */}
+            <View
+              style={[
+                styles.formPanel,
+                {
+                  backgroundColor: theme.tint,
+                },
+              ]}
+            >
+              {/* 1 pt inner white border */}
+              <View style={styles.formPanelBorder} pointerEvents="none" />
+
+              {/* Quantity Label */}
+              <Text style={[styles.quantityLabel, typography.label]}>
+                Quantity
+              </Text>
+
+              {/* Stepper */}
+              <View style={styles.stepperContainer}>
+                <QuantityStepper
+                  value={quantity}
+                  onChange={setQuantity}
+                  min={1}
+                  max={99}
+                />
+              </View>
+
+              {/* Expiry Date Field */}
+              <View style={styles.dateFieldWrapper}>
+                <DateField
+                  value={expiryDate || undefined}
+                  onChange={setExpiryDate}
+                  label="Expiry date"
+                  placeholder="DD / MM / YYYY"
+                  error={isPastDate ? 'Pick today or a later date' : false}
+                  helperText="We'll remind you before it expires."
+                />
+              </View>
+            </View>
+
+            {/* 5. Primary Button ("Continue") */}
+            <View style={styles.buttonWrapper}>
+              <PrimaryButton
+                testID="details-continue-btn"
+                label="Continue"
+                variant="arrow"
+                disabled={!isValidDate}
+                onPress={handleContinue}
+              />
+            </View>
+          </ScrollView>
+        </FridgeFrame>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.canvas,
+  },
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.huge,
-    paddingBottom: spacing.lg,
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  backText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  title: {
-    textAlign: 'center',
-  },
-  content: {
+  frame: {
     flex: 1,
-    padding: spacing.xl,
-    justifyContent: 'center',
   },
-  itemName: {
-    textAlign: 'center',
-    marginBottom: spacing.xl,
+  innerFrame: {
+    flex: 1,
   },
-  card: {
-    backgroundColor: colors.field.bg,
-    borderColor: colors.field.border,
-    borderWidth: 1.5,
+  scrollContent: {
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 16,
+    flexGrow: 1,
+    justifyContent: 'space-between',
+  },
+  headerPill: {
+    marginBottom: 12,
+  },
+  cavityWrapper: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  namePillWrapper: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  formPanel: {
+    width: '100%',
+    borderRadius: radius.lg, // 24
+    padding: spacing.lg, // 16
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  formPanelBorder: {
+    ...StyleSheet.absoluteFill,
     borderRadius: radius.lg,
-    padding: spacing.xl,
-    marginBottom: spacing.xxl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
-  label: {
+  quantityLabel: {
     color: colors.ink.label,
-    marginBottom: spacing.sm,
+    textAlign: 'center',
+    marginBottom: spacing.xs, // 4
   },
-  stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: spacing.sm,
+  stepperContainer: {
+    marginBottom: spacing.lg, // 16
   },
-  stepBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
-    backgroundColor: colors.stepperButton,
-    alignItems: 'center',
-    justifyContent: 'center',
+  dateFieldWrapper: {
+    width: '100%',
   },
-  stepBtnText: {
-    fontSize: 24,
-    color: colors.ink.title,
-    fontWeight: 'bold',
-  },
-  stepVal: {
-    marginHorizontal: spacing.xl,
-    color: colors.ink.title,
-  },
-  continueButton: {
-    backgroundColor: colors.brand.forest,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.xl,
-    alignItems: 'center',
-  },
-  continueText: {
-    color: colors.white,
+  buttonWrapper: {
+    width: '100%',
+    marginTop: 'auto',
   },
 });

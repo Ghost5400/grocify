@@ -100,6 +100,36 @@ describe('fridgeStore & selectors', () => {
       useFridgeStore.getState().markWelcomeSeen();
       expect(useFridgeStore.getState().settings.hasSeenWelcome).toBe(true);
     });
+
+    it('sets hasPromptedNotificationPermission', () => {
+      expect(useFridgeStore.getState().settings.hasPromptedNotificationPermission).toBe(false);
+      useFridgeStore.getState().setHasPromptedNotificationPermission(true);
+      expect(useFridgeStore.getState().settings.hasPromptedNotificationPermission).toBe(true);
+    });
+
+    it('reconciles notifications via notificationsService.reconcileAll', async () => {
+      const reconcileSpy = jest
+        .spyOn(notificationsService, 'reconcileAll')
+        .mockResolvedValueOnce([
+          {
+            id: 'item-1',
+            catalogId: 'tomato',
+            name: 'Tomato',
+            compartment: 'veggies',
+            imageKey: 'tomato',
+            quantity: 1,
+            expiryDate: '2026-10-25',
+            reminderDays: 2,
+            notificationId: 'reconciled-notif-1',
+            addedAt: '2026-10-20T00:00:00.000Z',
+          },
+        ]);
+
+      await useFridgeStore.getState().reconcileNotifications();
+
+      expect(reconcileSpy).toHaveBeenCalledTimes(1);
+      expect(useFridgeStore.getState().items[0]?.notificationId).toBe('reconciled-notif-1');
+    });
   });
 
   describe('selectors', () => {

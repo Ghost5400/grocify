@@ -2,9 +2,10 @@
 // Root layout: font loading, splash screen management, store hydration, and stack configuration.
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -27,6 +28,7 @@ export default function RootLayout() {
   const segments = useSegments();
   const hydrated = useFridgeStore((state) => state.hydrated);
   const hasSeenWelcome = useFridgeStore((state) => state.settings.hasSeenWelcome);
+  const reconcileNotifications = useFridgeStore((state) => state.reconcileNotifications);
 
   const [fontsLoaded] = useFonts({
     Figtree_400Regular,
@@ -43,8 +45,47 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {
         /* ignore */
       });
+      // Reconcile reminders on launch after store hydration per TRD section 8
+      reconcileNotifications().catch(() => {
+        /* ignore */
+      });
     }
-  }, [isReady]);
+  }, [isReady, reconcileNotifications]);
+
+  // Notification tap interaction & deep linking (TRD section 8 & Kickoff Task 3)
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    function handleNotificationResponse(response: Notifications.NotificationResponse) {
+      const compartment = response?.notification?.request?.content?.data?.compartment;
+      if (
+        compartment === 'freezer' ||
+        compartment === 'packed' ||
+        compartment === 'veggies'
+      ) {
+        router.push(`/compartment/${compartment}`);
+        Notifications.clearLastNotificationResponseAsync().catch(() => {});
+      }
+    }
+
+    // 1. Initial notification response (app opened from closed state via notification tap)
+    Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        if (response) {
+          handleNotificationResponse(response);
+        }
+      })
+      .catch(() => {});
+
+    // 2. Active notification response listener
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      handleNotificationResponse
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [router]);
 
   // Launch routing logic
   useEffect(() => {

@@ -1,8 +1,9 @@
-// __tests__/features/add/Review.test.tsx
 import React from 'react';
+import { Linking } from 'react-native';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { addDays, format } from 'date-fns';
 import ReviewScreen from '../../../app/add/review';
+import { notificationsService } from '@/services/notifications';
 import { useDraftStore } from '@/store/draftStore';
 import { useFridgeStore } from '@/store/fridgeStore';
 import { formatDateLong, ISO_DATE_FORMAT } from '@/utils/date';
@@ -24,7 +25,9 @@ describe('ReviewScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined as any);
     useFridgeStore.getState().resetAllForDev();
+    useFridgeStore.getState().setHasPromptedNotificationPermission(true);
     useDraftStore.getState().resetDraft();
     useDraftStore.getState().setCatalogEntry({
       id: 'tomato',
@@ -80,7 +83,7 @@ describe('ReviewScreen', () => {
     expect(mockBack).toHaveBeenCalledTimes(1);
   });
 
-  it('adds item to fridge store, resets draft, and replaces route to /fridge on Add to fridge press', async () => {
+  it('adds item to fridge store, resets draft, and replaces route to /fridge on Add to fridge press when already prompted', async () => {
     await render(<ReviewScreen />);
 
     const saveButton = screen.getByTestId('review-save-btn');
@@ -103,5 +106,79 @@ describe('ReviewScreen', () => {
         params: { justAdded: 'veggies' },
       });
     });
+  });
+
+  it('presents NotificationPermissionSheet on first item save if not yet prompted, and allows enabling', async () => {
+    useFridgeStore.getState().setHasPromptedNotificationPermission(false);
+    const ensurePermissionSpy = jest.spyOn(notificationsService, 'ensurePermission');
+
+    await render(<ReviewScreen />);
+
+    const saveButton = screen.getByTestId('review-save-btn');
+    fireEvent.press(saveButton);
+
+    // Permission sheet should appear
+    await waitFor(() => {
+      expect(screen.getByTestId('permission-sheet-title')).toBeTruthy();
+      expect(screen.getByText('Stay ahead of expiry')).toBeTruthy();
+    });
+
+    // Tap allow
+    const allowBtn = screen.getByTestId('permission-sheet-allow-btn');
+    fireEvent.press(allowBtn);
+
+    await waitFor(() => {
+      expect(ensurePermissionSpy).toHaveBeenCalled();
+      expect(useFridgeStore.getState().settings.hasPromptedNotificationPermission).toBe(true);
+      expect(useFridgeStore.getState().items.length).toBe(1);
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/fridge',
+        params: { justAdded: 'veggies' },
+      });
+    });
+  });
+
+  it('allows user to dismiss pre-prompt with Not now and still completes the save', async () => {
+    useFridgeStore.getState().setHasPromptedNotificationPermission(false);
+
+    await render(<ReviewScreen />);
+
+    const saveButton = screen.getByTestId('review-save-btn');
+    fireEvent.press(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('permission-sheet-title')).toBeTruthy();
+    });
+
+    const notNowBtn = screen.getByTestId('permission-sheet-not-now-btn');
+    fireEvent.press(notNowBtn);
+
+    await waitFor(() => {
+      expect(useFridgeStore.getState().settings.hasPromptedNotificationPermission).toBe(true);
+      expect(useFridgeStore.getState().items.length).toBe(1);
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/fridge',
+        params: { justAdded: 'veggies' },
+      });
+    });
+  });
+
+  it('renders non-blocking notice when notifications are denied, and Settings button calls openSettings', async () => {
+    useFridgeStore.getState().setHasPromptedNotificationPermission(true);
+    jest.spyOn(notificationsService, 'checkPermission').mockResolvedValue(false);
+
+    await render(<ReviewScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('review-permission-hint')).toBeTruthy();
+      expect(
+        screen.getByText('Turn on notifications to get expiry reminders')
+      ).toBeTruthy();
+    });
+
+    const settingsBtn = screen.getByTestId('review-open-settings-btn');
+    fireEvent.press(settingsBtn);
+
+    expect(Linking.openSettings).toHaveBeenCalledTimes(1);
   });
 });

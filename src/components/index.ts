@@ -25,7 +25,7 @@ export * from './fridge/FridgeHeader';
 export * from './fridge/ShelfPreview';
 export * from './fridge/CompartmentPanel';
 
-// Phase 5 components
+// Phase 5 & 6 components
 export * from '../features/inventory';
-
+export * from '../features/add-item/NotificationPermissionSheet';
 

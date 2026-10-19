@@ -20,6 +20,8 @@ export interface FridgeState {
   ) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   markWelcomeSeen: () => void;
+  setHasPromptedNotificationPermission: (prompted: boolean) => void;
+  reconcileNotifications: () => Promise<void>;
   setHydrated: (hydrated: boolean) => void;
   resetAllForDev: () => void;
   seedSampleItemsForDev: (sampleItems: Item[]) => void;
@@ -28,6 +30,7 @@ export interface FridgeState {
 const initialSettings: Settings = {
   defaultReminderDays: 2,
   hasSeenWelcome: false,
+  hasPromptedNotificationPermission: false,
 };
 
 export const useFridgeStore = create<FridgeState>()(
@@ -105,6 +108,21 @@ export const useFridgeStore = create<FridgeState>()(
             hasSeenWelcome: true,
           },
         }));
+      },
+
+      setHasPromptedNotificationPermission: (prompted: boolean) => {
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            hasPromptedNotificationPermission: prompted,
+          },
+        }));
+      },
+
+      reconcileNotifications: async () => {
+        const currentItems = get().items;
+        const updatedItems = await notificationsService.reconcileAll(currentItems);
+        set({ items: updatedItems });
       },
 
       setHydrated: (hydrated: boolean) => {

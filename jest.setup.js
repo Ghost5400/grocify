@@ -176,4 +176,49 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   };
 });
 
-
+// Mock expo-notifications
+jest.mock('expo-notifications', () => {
+  const listeners = [];
+  return {
+    setNotificationHandler: jest.fn(),
+    setNotificationChannelAsync: jest.fn().mockResolvedValue({}),
+    getNotificationChannelsAsync: jest.fn().mockResolvedValue([]),
+    scheduleNotificationAsync: jest.fn().mockResolvedValue('mock-notification-id-123'),
+    cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
+    cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
+    getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
+    getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+    requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted', granted: true }),
+    getLastNotificationResponseAsync: jest.fn().mockResolvedValue(null),
+    clearLastNotificationResponseAsync: jest.fn().mockResolvedValue(undefined),
+    addNotificationResponseReceivedListener: jest.fn((cb) => {
+      listeners.push(cb);
+      return {
+        remove: jest.fn(() => {
+          const index = listeners.indexOf(cb);
+          if (index !== -1) listeners.splice(index, 1);
+        }),
+      };
+    }),
+    addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+    SchedulableTriggerInputTypes: {
+      DATE: 'date',
+      TIME_INTERVAL: 'timeInterval',
+      DAILY: 'daily',
+      WEEKLY: 'weekly',
+      MONTHLY: 'monthly',
+      YEARLY: 'yearly',
+    },
+    AndroidImportance: {
+      UNKNOWN: 0,
+      UNSPECIFIED: 1,
+      NONE: 2,
+      MIN: 3,
+      LOW: 4,
+      DEFAULT: 5,
+      HIGH: 6,
+      MAX: 7,
+    },
+    DEFAULT_ACTION_IDENTIFIER: 'expo.modules.notifications.actions.DEFAULT',
+  };
+});

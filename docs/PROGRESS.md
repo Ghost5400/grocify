@@ -1,7 +1,7 @@
 # GROCIFY — Progress Log
 
-**Current Phase:** Phase 5 — Compartment Inventory Detail (Completed)
-**Next Phase:** Phase 6 — Reminders, Polish, and Release
+**Current Phase:** Phase 6 — Reminders, Polish, and Release (Completed)
+**Next Phase:** Project Completed / Production Ready
 
 ## Completed Tasks
 - [x] Phase 1 Task 1.1: Reorganize project docs into `docs/` and reference assets into `docs/reference/`.
@@ -60,4 +60,14 @@
 - [x] Phase 5 Task 5.8: Wrap root stack in `<GestureHandlerRootView style={{ flex: 1 }}>` (`app/_layout.tsx`) and configure `ReanimatedSwipeable` Jest mock in `jest.setup.js`.
 - [x] Phase 5 Task 5.9: Write and pass 5 new test suites: `InventoryHeader.test.tsx` (4 tests), `SwipeableItemRow.test.tsx` (3 tests), `EditItemSheet.test.tsx` (7 tests), `DeleteConfirmSheet.test.tsx` (5 tests), `CompartmentInventory.test.tsx` (6 tests) — total 19 suites, 104 tests passing.
 - [x] Phase 5 Task 5.10: Verify `npm run typecheck`, `npm run lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_5_REPORT.md` and tag repository `phase-5`.
+- [x] Phase 6 Task 6.1: Implement real `notificationsService` in `src/services/notifications.ts` with foreground handler, Android channel `expiry-reminders`, `scheduleItemReminder`, `cancelItemReminder`, and iOS 60-cap `reconcileAll`.
+- [x] Phase 6 Task 6.2: Implement `NotificationPermissionSheet` modal per UIUX 9.4 with 52 pt forest circle, sheen, bell icon, and trigger on first save.
+- [x] Phase 6 Task 6.3: Implement non-blocking notification denied hint with "Settings" link in `app/add/review.tsx`.
+- [x] Phase 6 Task 6.4: Implement notification tap response listener and deep linking to `/compartment/<compartment>` in `app/_layout.tsx`.
+- [x] Phase 6 Task 6.5: Wire store startup reconciliation `reconcileNotifications()` in `app/_layout.tsx` on hydration.
+- [x] Phase 6 Task 6.6: Configure `eas.json` for development, preview (standalone Android APK), and production profiles, and add Android notification permissions to `app.json`.
+- [x] Phase 6 Task 6.7: Gate dev gallery and sample data seeding strictly behind `__DEV__`.
+- [x] Phase 6 Task 6.8: Create project root `README.md` with features, stack, local run, testing, and EAS build instructions.
+- [x] Phase 6 Task 6.9: Write and pass 2 new test suites (`notifications.test.ts`, `NotificationPermissionSheet.test.tsx`) and update Review/Integration tests — total 21 suites, 131 tests passing.
+- [x] Phase 6 Task 6.10: Verify `tsc --noEmit`, `eslint .`, and `npm test` all pass with 0 errors; compile `docs/PHASE_REPORTS/PHASE_6_REPORT.md`.
 

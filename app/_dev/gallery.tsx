@@ -36,6 +36,17 @@ import { colors, compartmentTheme, radius, spacing, typography } from '@/theme/t
 
 export default function DevGalleryScreen() {
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (!__DEV__) {
+      router.replace('/fridge');
+    }
+  }, [router]);
+
+  if (!__DEV__) {
+    return null;
+  }
+
   const [activeCompartment, setActiveCompartment] = useState<CompartmentId>('veggies');
   const [stepperVal, setStepperVal] = useState<number>(3);
   const [dateVal, setDateVal] = useState<string>('2026-12-25');

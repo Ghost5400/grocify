@@ -1,18 +1,17 @@
-// app/add/review.tsx
-// Confirmation / Review screen per UIUX.md Section 9.2.
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { CalendarDays } from 'lucide-react-native';
+import { BellOff, CalendarDays } from 'lucide-react-native';
 import { CompartmentIconCircle } from '@/components/CompartmentIconCircle';
 import { FridgeFrame } from '@/components/FridgeFrame';
 import { ItemShowcaseCavity } from '@/components/common/ItemShowcaseCavity';
@@ -21,7 +20,9 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { TextButton } from '@/components/TextButton';
 import { COMPARTMENTS } from '@/data/compartments';
+import { NotificationPermissionSheet } from '@/features/add-item/NotificationPermissionSheet';
 import { ReminderChipGroup } from '@/features/add-item/ReminderChipGroup';
+import { notificationsService } from '@/services/notifications';
 import { useDraftStore } from '@/store/draftStore';
 import { useFridgeStore } from '@/store/fridgeStore';
 import {
@@ -46,6 +47,21 @@ export default function ReviewScreen() {
   const setReminderDays = useDraftStore((state) => state.setReminderDays);
   const resetDraft = useDraftStore((state) => state.resetDraft);
   const addItem = useFridgeStore((state) => state.addItem);
+  const hasPromptedNotificationPermission = useFridgeStore(
+    (state) => !!state.settings.hasPromptedNotificationPermission
+  );
+  const setHasPromptedNotificationPermission = useFridgeStore(
+    (state) => state.setHasPromptedNotificationPermission
+  );
+
+  const [showPermissionSheet, setShowPermissionSheet] = useState(false);
+  const [isPermissionGranted, setIsPermissionGranted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    notificationsService.checkPermission().then((granted) => {
+      setIsPermissionGranted(granted);
+    });
+  }, []);
 
   const theme = compartmentTheme[compartment];
   const compartmentName = COMPARTMENTS[compartment].name;
@@ -55,7 +71,7 @@ export default function ReviewScreen() {
     router.back();
   };
 
-  const handleSave = async () => {
+  const executeSave = async () => {
     // 1. Persist to fridge store
     await addItem({
       catalogId: catalogEntry?.id || null,
@@ -84,6 +100,27 @@ export default function ReviewScreen() {
       pathname: '/fridge',
       params: { justAdded: compartment },
     });
+  };
+
+  const handleSaveClick = async () => {
+    if (!hasPromptedNotificationPermission) {
+      setShowPermissionSheet(true);
+      return;
+    }
+    await executeSave();
+  };
+
+  const handleAllowPermission = async () => {
+    setShowPermissionSheet(false);
+    setHasPromptedNotificationPermission(true);
+    await notificationsService.ensurePermission();
+    await executeSave();
+  };
+
+  const handleNotNowPermission = async () => {
+    setShowPermissionSheet(false);
+    setHasPromptedNotificationPermission(true);
+    await executeSave();
   };
 
   return (
@@ -187,13 +224,35 @@ export default function ReviewScreen() {
               </View>
             </View>
 
+            {/* Optional Permission Denied Non-Blocking Hint */}
+            {hasPromptedNotificationPermission && isPermissionGranted === false && (
+              <View style={styles.permissionNotice} testID="review-permission-hint">
+                <View style={styles.permissionNoticeIconWrap}>
+                  <BellOff size={16} color={colors.status.expiringSoon.fg} strokeWidth={2.2} />
+                </View>
+                <Text style={[styles.permissionNoticeText, typography.label]}>
+                  Turn on notifications to get expiry reminders
+                </Text>
+                <TouchableOpacity
+                  testID="review-open-settings-btn"
+                  accessibilityRole="button"
+                  accessibilityLabel="Open settings to turn on notifications"
+                  onPress={() => Linking.openSettings().catch(() => {})}
+                  style={styles.settingsLinkBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={[styles.settingsLinkText, typography.label]}>Settings</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* 4. Action Buttons */}
             <View style={styles.actionsContainer}>
               <PrimaryButton
                 testID="review-save-btn"
                 label="Add to fridge"
                 variant="check"
-                onPress={handleSave}
+                onPress={handleSaveClick}
               />
               <TextButton
                 testID="review-edit-btn"
@@ -205,6 +264,13 @@ export default function ReviewScreen() {
           </ScrollView>
         </FridgeFrame>
       </View>
+
+      {/* Notification Permission Pre-Prompt Bottom Sheet */}
+      <NotificationPermissionSheet
+        visible={showPermissionSheet}
+        onAllow={handleAllowPermission}
+        onNotNow={handleNotNowPermission}
+      />
     </View>
   );
 }
@@ -298,5 +364,40 @@ const styles = StyleSheet.create({
     minHeight: 44,
     minWidth: 44,
     justifyContent: 'center',
+  },
+  permissionNotice: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.status.expiringSoon.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: '#E8D5B0',
+  },
+  permissionNoticeIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  permissionNoticeText: {
+    flex: 1,
+    color: colors.ink.title,
+  },
+  settingsLinkBtn: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  settingsLinkText: {
+    color: colors.brand.forest,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 });

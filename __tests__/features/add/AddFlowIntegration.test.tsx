@@ -120,6 +120,11 @@ describe('Add Flow Integration Test', () => {
     const saveButton = screen.getByTestId('review-save-btn');
     fireEvent.press(saveButton);
 
+    // Permission sheet appears on first item save per UIUX 9.4
+    const allowBtn = await screen.findByTestId('permission-sheet-allow-btn');
+    expect(allowBtn).toBeTruthy();
+    fireEvent.press(allowBtn);
+
     // ----------------------------------------------------
     // Step 4: Verification of Store State & Navigation
     // ----------------------------------------------------

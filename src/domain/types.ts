@@ -21,6 +21,7 @@ export interface Item {
 export interface Settings {
   defaultReminderDays: number; // default 2
   hasSeenWelcome: boolean;
+  hasPromptedNotificationPermission?: boolean;
 }
 
 export interface CatalogEntry {

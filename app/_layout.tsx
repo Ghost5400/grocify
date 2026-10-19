@@ -4,6 +4,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -62,21 +63,23 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.canvas },
-        animation: 'fade',
-      }}
-    >
-      <Stack.Screen name="index" options={{ animation: 'fade' }} />
-      <Stack.Screen name="fridge" options={{ animation: 'fade' }} />
-      <Stack.Screen name="compartment/[id]" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="add/pick" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="add/details" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="add/review" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="_dev/gallery" options={{ animation: 'slide_from_bottom' }} />
-    </Stack>
+    <GestureHandlerRootView style={styles.rootView}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.canvas },
+          animation: 'fade',
+        }}
+      >
+        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="fridge" options={{ animation: 'fade' }} />
+        <Stack.Screen name="compartment/[id]" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="add/pick" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="add/details" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="add/review" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="_dev/gallery" options={{ animation: 'slide_from_bottom' }} />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
 
@@ -84,5 +87,8 @@ const styles = StyleSheet.create({
   splashFill: {
     flex: 1,
     backgroundColor: colors.canvas,
+  },
+  rootView: {
+    flex: 1,
   },
 });

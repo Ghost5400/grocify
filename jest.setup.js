@@ -91,6 +91,11 @@ jest.mock('expo-haptics', () => ({
     Medium: 'medium',
     Heavy: 'heavy',
   },
+  NotificationFeedbackType: {
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
+  },
 }));
 
 // Mock @react-native-community/datetimepicker
@@ -120,4 +125,55 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaFrame: () => ({ x: 0, y: 0, width: 393, height: 852 }),
   };
 });
+
+// Mock react-native-gesture-handler
+jest.mock('react-native-gesture-handler', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    GestureHandlerRootView: ({ children, style }) =>
+      React.createElement(View, { style, testID: 'gesture-handler-root-view' }, children),
+    Swipeable: ({ children, renderRightActions }) =>
+      React.createElement(
+        View,
+        { testID: 'mock-swipeable' },
+        children,
+        renderRightActions ? renderRightActions() : null
+      ),
+    PanGestureHandler: ({ children }) => children,
+    TapGestureHandler: ({ children }) => children,
+    State: {},
+    Directions: {},
+  };
+});
+
+// Mock react-native-gesture-handler/ReanimatedSwipeable
+jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const MockComponent = React.forwardRef(function MockReanimatedSwipeable(props, ref) {
+    const mockMethods = {
+      close: jest.fn(),
+      openRight: jest.fn(),
+      openLeft: jest.fn(),
+      reset: jest.fn(),
+    };
+    if (ref && typeof ref === 'object') {
+      ref.current = mockMethods;
+    }
+    return React.createElement(
+      View,
+      { testID: props.testID || 'mock-reanimated-swipeable' },
+      props.children,
+      props.renderRightActions
+        ? props.renderRightActions(null, null, mockMethods)
+        : null
+    );
+  });
+  return {
+    __esModule: true,
+    default: MockComponent,
+  };
+});
+
 

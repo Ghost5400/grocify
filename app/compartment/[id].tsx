@@ -1,123 +1,251 @@
 // app/compartment/[id].tsx
-// Compartment Inventory screen (Phase 1 Placeholder).
+// Compartment Inventory screen matching UIUX.md Section 9.3 and Kickoff Phase 5 specs.
 
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COMPARTMENTS } from '@/data/compartments';
-import { CompartmentId } from '@/domain/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EmptyState } from '@/components/EmptyState';
+import { FridgeFrame } from '@/components/FridgeFrame';
+import { LightStrip } from '@/components/LightStrip';
+import { CompartmentId, Item } from '@/domain/types';
+import {
+  DeleteConfirmSheet,
+  EditItemSheet,
+  InventoryHeader,
+  SwipeableItemRow,
+} from '@/features/inventory';
 import { selectItemsByCompartment, useFridgeStore } from '@/store/fridgeStore';
-import { colors, compartmentTheme, radius, spacing, typography } from '@/theme/tokens';
+import {
+  colors,
+  compartmentTheme,
+  spacing,
+} from '@/theme/tokens';
 
-export default function CompartmentScreen() {
+const VALID_COMPARTMENTS: readonly CompartmentId[] = ['freezer', 'packed', 'veggies'] as const;
+
+function isValidCompartment(id: unknown): id is CompartmentId {
+  return typeof id === 'string' && VALID_COMPARTMENTS.includes(id as CompartmentId);
+}
+
+export default function CompartmentInventoryScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: CompartmentId }>();
+  const insets = useSafeAreaInsets();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-  const validId: CompartmentId =
-    id === 'freezer' || id === 'packed' || id === 'veggies' ? id : 'veggies';
+  const isKnown = isValidCompartment(id);
 
-  const compartmentInfo = COMPARTMENTS[validId] || COMPARTMENTS.veggies;
+  // Safe redirect if invalid or unknown compartment id
+  useEffect(() => {
+    if (!isKnown) {
+      router.replace('/fridge');
+    }
+  }, [isKnown, router]);
+
+  const validId: CompartmentId = isKnown ? id : 'veggies';
   const theme = compartmentTheme[validId];
-  const items = useFridgeStore((state) => selectItemsByCompartment(state.items, validId));
+
+  // Store state and actions
+  const allItems = useFridgeStore((state) => state.items);
+  const items = React.useMemo(
+    () => selectItemsByCompartment(allItems, validId),
+    [allItems, validId]
+  );
+  const updateItem = useFridgeStore((state) => state.updateItem);
+  const removeItem = useFridgeStore((state) => state.removeItem);
+
+  // Modal states for editing and deleting
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [deletingItem, setDeletingItem] = useState<Item | null>(null);
+
+  const handleBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleAdd = useCallback(() => {
+    router.push(`/add/pick?compartment=${validId}` as any);
+  }, [router, validId]);
+
+  const handleRowPress = useCallback((item: Item) => {
+    setEditingItem(item);
+  }, []);
+
+  const handleDeletePress = useCallback((item: Item) => {
+    setDeletingItem(item);
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (patch: { quantity: number; expiryDate: string; reminderDays: number }) => {
+      if (!editingItem) return;
+      await updateItem(editingItem.id, patch);
+      setEditingItem(null);
+    },
+    [editingItem, updateItem]
+  );
+
+  const handleDeleteFromEdit = useCallback(() => {
+    if (!editingItem) return;
+    const target = editingItem;
+    setEditingItem(null);
+    setDeletingItem(target);
+  }, [editingItem]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deletingItem) return;
+    const idToDelete = deletingItem.id;
+    setDeletingItem(null);
+    await removeItem(idToDelete);
+  }, [deletingItem, removeItem]);
+
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<Item> | null | undefined, index: number) => ({
+      length: 86, // 76 pt row height + 10 pt gap
+      offset: 86 * index,
+      index,
+    }),
+    []
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Item }) => (
+      <SwipeableItemRow
+        item={item}
+        onPress={handleRowPress}
+        onDelete={handleDeletePress}
+        testID={`inventory-item-${item.id}`}
+      />
+    ),
+    [handleRowPress, handleDeletePress]
+  );
+
+  const keyExtractor = useCallback((item: Item) => item.id, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }]}>
-      <View style={[styles.header, { backgroundColor: theme.tint }]}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          accessibilityRole="button"
-          accessibilityLabel="Back to fridge"
+    <View style={styles.screen}>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: Math.max(insets.top, spacing.xs),
+            paddingBottom: Math.max(insets.bottom, spacing.md),
+          },
+        ]}
+      >
+        <FridgeFrame
+          rimWidth={10}
+          insetHorizontal={10}
+          style={styles.frame}
+          innerStyle={[styles.innerFrame, { backgroundColor: theme.surface }]}
         >
-          <Text style={[styles.backText, { color: theme.ink }]}>‹ Back</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, typography.titleMd, { color: theme.ink }]}>
-          {compartmentInfo.name}
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push(`/add/pick?compartment=${validId}` as any)}
-          style={[styles.addCircle, { backgroundColor: theme.accent }]}
-          accessibilityRole="button"
-          accessibilityLabel={`Add item to ${compartmentInfo.name}`}
-        >
-          <Text style={styles.addCircleText}>+</Text>
-        </TouchableOpacity>
+          {/* 1. Header Pill (72 pt) with back arrow, 52 pt icon, title, count chip, and + button */}
+          <View style={styles.headerWrapper}>
+            <InventoryHeader
+              compartment={validId}
+              itemCount={items.length}
+              onBack={handleBack}
+              onAdd={handleAdd}
+            />
+          </View>
+
+          {/* 2. Light Strip under the header */}
+          <View style={styles.lightStripWrapper}>
+            <LightStrip widthPercent={70} />
+          </View>
+
+          {/* 3. Compartment Cavity: Scrollable list of items or empty state */}
+          <View style={styles.cavity}>
+            {items.length === 0 ? (
+              <View style={styles.emptyContainer} testID="inventory-empty-state">
+                <EmptyState
+                  compartment={validId}
+                  title="Nothing here yet"
+                  body="Add your first item to this compartment."
+                  buttonLabel="Add item"
+                  onAddItem={handleAdd}
+                />
+              </View>
+            ) : (
+              <FlatList
+                testID="inventory-list"
+                data={items}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                getItemLayout={getItemLayout}
+                ItemSeparatorComponent={ItemSeparator}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </View>
+        </FridgeFrame>
       </View>
 
-      <View style={styles.content}>
-        <Text style={[styles.subtitle, typography.headline, { color: theme.ink }]}>
-          {items.length} {items.length === 1 ? 'item' : 'items'} in {compartmentInfo.name}
-        </Text>
-        <Text style={[styles.body, typography.body, { color: theme.ink }]}>
-          Phase 1 Inventory Placeholder. Items listed will appear here in Phase 5.
-        </Text>
+      {/* Edit Item Bottom Sheet Modal */}
+      <EditItemSheet
+        visible={Boolean(editingItem)}
+        item={editingItem}
+        onSave={handleSaveEdit}
+        onDelete={handleDeleteFromEdit}
+        onClose={() => setEditingItem(null)}
+      />
 
-        <TouchableOpacity
-          style={[styles.cta, { backgroundColor: colors.brand.forest }]}
-          onPress={() => router.push(`/add/pick?compartment=${validId}` as any)}
-        >
-          <Text style={[styles.ctaText, typography.button]}>Add Item to {compartmentInfo.name}</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Delete Confirmation Sheet Modal */}
+      <DeleteConfirmSheet
+        visible={Boolean(deletingItem)}
+        item={deletingItem}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletingItem(null)}
+      />
     </View>
   );
 }
 
+function ItemSeparator() {
+  return <View style={styles.separator} />;
+}
+
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.canvas,
+  },
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.huge,
-    paddingBottom: spacing.lg,
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  backText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  title: {
-    textAlign: 'center',
-  },
-  addCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addCircleText: {
-    color: colors.white,
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: -2,
-  },
-  content: {
+  frame: {
     flex: 1,
-    padding: spacing.xl,
+  },
+  innerFrame: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  headerWrapper: {
+    marginBottom: 8,
+  },
+  lightStripWrapper: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  cavity: {
+    flex: 1,
+    position: 'relative',
+  },
+  emptyContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  subtitle: {
-    marginBottom: spacing.md,
-    textAlign: 'center',
+  listContent: {
+    paddingVertical: 4,
+    paddingBottom: 20,
   },
-  body: {
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
-  },
-  cta: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.xl,
-  },
-  ctaText: {
-    color: colors.white,
+  separator: {
+    height: 10,
   },
 });

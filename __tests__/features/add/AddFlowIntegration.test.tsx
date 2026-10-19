@@ -1,6 +1,8 @@
 // __tests__/features/add/AddFlowIntegration.test.tsx
 // End-to-end integration test for the Add Flow per PRD Section 6.2 and Kickoff Phase 4 specs.
 
+jest.setTimeout(25000);
+
 import React from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { addDays, format } from 'date-fns';

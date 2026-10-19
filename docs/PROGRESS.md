@@ -1,7 +1,7 @@
 # GROCIFY — Progress Log
 
-**Current Phase:** Phase 4 — Add Flow (Completed)
-**Next Phase:** Phase 5 — Compartment Inventory Detail
+**Current Phase:** Phase 5 — Compartment Inventory Detail (Completed)
+**Next Phase:** Phase 6 — Reminders, Polish, and Release
 
 ## Completed Tasks
 - [x] Phase 1 Task 1.1: Reorganize project docs into `docs/` and reference assets into `docs/reference/`.
@@ -49,5 +49,15 @@
 - [x] Phase 4 Task 4.8: Handle `justAdded` route param in `app/fridge.tsx` to trigger highlight glow pulse on the receiving `CompartmentPanel` after save.
 - [x] Phase 4 Task 4.9: Write and pass all 4 new test suites: `ItemPicker.test.tsx`, `AddDetails.test.tsx`, `Review.test.tsx`, `AddFlowIntegration.test.tsx` — total 14 suites, 79 tests passing.
 - [x] Phase 4 Task 4.10: Fix test infrastructure — add `AsyncStorage` mock, `SafeAreaContext` mock, document React 19 / RNTL v14 `act()` rules (no unawaited `act()` in sync `beforeEach`; store calls outside React tree need no `act()`).
-- [x] Phase 4 Task 4.11: Verify `tsc --noEmit`, `expo lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_4_REPORT.md` and tag repository `phase-4`.
+- [x] Phase 4 Task 4.12: Verify `tsc --noEmit`, `expo lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_4_REPORT.md` and tag repository `phase-4`.
+- [x] Phase 5 Task 5.1: Implement `InventoryHeader` — 72 pt pill matching UIUX 9.3 with back button, 52 pt icon circle with glossy sheen, compartment title, count chip, and 40 pt `+` button linking to `/add/pick?compartment=<id>` (`src/features/inventory/InventoryHeader.tsx`).
+- [x] Phase 5 Task 5.2: Implement `SwipeableItemRow` — memoized row wrapping `ItemRow` with `ReanimatedSwipeable`, revealing an 80 pt `#B23B30` red delete button with `Trash2` icon (`src/features/inventory/SwipeableItemRow.tsx`).
+- [x] Phase 5 Task 5.3: Implement `EditItemSheet` — bottom sheet modal with item image, name pill, `QuantityStepper`, `DateField`, `ReminderChipGroup`, Save primary button, and secondary "Remove item" button (`src/features/inventory/EditItemSheet.tsx`).
+- [x] Phase 5 Task 5.4: Implement `DeleteConfirmSheet` — bottom sheet confirmation modal with warning haptic, confirm removal, and cancel actions (`src/features/inventory/DeleteConfirmSheet.tsx`).
+- [x] Phase 5 Task 5.5: Implement full Compartment Inventory screen (`app/compartment/[id].tsx`) — `FridgeFrame`, `LightStrip`, `InventoryHeader`, `FlatList` with fixed 86 pt `getItemLayout`, sort by soonest expiry, empty state, and modal sheets.
+- [x] Phase 5 Task 5.6: Implement safe compartment ID validation and redirect unknown IDs safely to `/fridge`.
+- [x] Phase 5 Task 5.7: Ensure store sync between compartment inventory actions (edits, removals) and `ShelfPreview` / count chips on `/fridge`.
+- [x] Phase 5 Task 5.8: Wrap root stack in `<GestureHandlerRootView style={{ flex: 1 }}>` (`app/_layout.tsx`) and configure `ReanimatedSwipeable` Jest mock in `jest.setup.js`.
+- [x] Phase 5 Task 5.9: Write and pass 5 new test suites: `InventoryHeader.test.tsx` (4 tests), `SwipeableItemRow.test.tsx` (3 tests), `EditItemSheet.test.tsx` (7 tests), `DeleteConfirmSheet.test.tsx` (5 tests), `CompartmentInventory.test.tsx` (6 tests) — total 19 suites, 104 tests passing.
+- [x] Phase 5 Task 5.10: Verify `npm run typecheck`, `npm run lint`, and `npm test` all pass with zero errors; compile `docs/PHASE_REPORTS/PHASE_5_REPORT.md` and tag repository `phase-5`.
 

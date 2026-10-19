@@ -7,6 +7,20 @@ jest.mock('react-native-reanimated', () => {
   const React = require('react');
   const { View, Text } = require('react-native');
 
+  const createAnimBuilder = () => {
+    const builder = {
+      duration: () => builder,
+      delay: () => builder,
+      springify: () => builder,
+      damping: () => builder,
+      stiffness: () => builder,
+      easing: () => builder,
+      withCallback: () => builder,
+      build: () => ({}),
+    };
+    return builder;
+  };
+
   return {
     __esModule: true,
     default: {
@@ -25,6 +39,14 @@ jest.mock('react-native-reanimated', () => {
       linear: () => 0,
     },
     useReducedMotion: () => false,
+    FadeIn: createAnimBuilder(),
+    FadeInDown: createAnimBuilder(),
+    FadeInUp: createAnimBuilder(),
+    FadeOut: createAnimBuilder(),
+    FadeOutDown: createAnimBuilder(),
+    FadeOutUp: createAnimBuilder(),
+    LinearTransition: createAnimBuilder(),
+    Layout: createAnimBuilder(),
   };
 });
 

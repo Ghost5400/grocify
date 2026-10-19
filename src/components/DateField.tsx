@@ -13,8 +13,10 @@ import {
   ViewStyle,
 } from 'react-native';
 import DateTimePicker, {
+  DateTimePickerChangeEvent,
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
+import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 import {
   addDays,
   addMonths,
@@ -33,6 +35,8 @@ import {
 import { CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 import { formatDateDisplay, ISO_DATE_FORMAT } from '@/utils/date';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export interface DateFieldProps {
   value?: string; // YYYY-MM-DD
@@ -83,14 +87,18 @@ export function DateField({
     setShowPicker(true);
   };
 
-  const handleAndroidChange = (
-    event: DateTimePickerEvent,
-    selectedDate?: Date
+  const handleAndroidValueChange = (
+    _event: DateTimePickerChangeEvent,
+    selectedDate: Date
   ) => {
     setShowPicker(false);
-    if (event.type === 'set' && selectedDate) {
+    if (selectedDate) {
       onChange(format(selectedDate, ISO_DATE_FORMAT));
     }
+  };
+
+  const handleAndroidDismiss = () => {
+    setShowPicker(false);
   };
 
   const handleIosConfirm = () => {
@@ -177,7 +185,8 @@ export function DateField({
           mode="date"
           display="default"
           minimumDate={new Date()}
-          onChange={handleAndroidChange}
+          onValueChange={handleAndroidValueChange}
+          onDismiss={handleAndroidDismiss}
         />
       )}
 
@@ -233,7 +242,8 @@ export function DateField({
             style={styles.webBackdrop}
             onPress={() => setShowPicker(false)}
           >
-            <Pressable
+            <AnimatedPressable
+              entering={FadeInDown.duration(220)}
               style={styles.webModalCard}
               onPress={(e) => e.stopPropagation()}
             >
@@ -397,7 +407,7 @@ export function DateField({
                   <Text style={styles.webCancelText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           </Pressable>
         </Modal>
       )}

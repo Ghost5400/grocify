@@ -7,6 +7,7 @@ export default tseslint.config(
       '**/.expo/**',
       '**/dist/**',
       'docs/**',
+      'scripts/**',
       '*.config.js',
       '*.config.mjs',
     ],

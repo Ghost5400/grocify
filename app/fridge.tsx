@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
   CompartmentPanel,
   FridgeBase,
@@ -129,14 +130,19 @@ export default function FridgeScreen() {
         bounces={false}
       >
         {/* Compact Header (48 pt) */}
-        <FridgeHeader
-          totalCount={totalCount}
-          onPressAdd={handlePressAdd}
-          onLongPressWordmark={handleDevMenu}
-        />
+        <Animated.View entering={FadeIn.duration(280)}>
+          <FridgeHeader
+            totalCount={totalCount}
+            onPressAdd={handlePressAdd}
+            onLongPressWordmark={handleDevMenu}
+          />
+        </Animated.View>
 
         {/* Outer Fridge Frame with 6 pt Silver Rim */}
-        <View style={styles.fridgeFrameContainer}>
+        <Animated.View
+          entering={FadeInDown.duration(320).springify().damping(18)}
+          style={styles.fridgeFrameContainer}
+        >
           <View style={[styles.outerRim, elevation.elevFridge]}>
             {/* 1 pt inner white highlight ring */}
             <View style={styles.innerHighlightRing} pointerEvents="none" />
@@ -144,14 +150,16 @@ export default function FridgeScreen() {
             {/* Stacked Compartments */}
             <View style={styles.compartmentsStack}>
               {/* 1. Freezer Compartment */}
-              <CompartmentPanel
-                compartment="freezer"
-                name="Freezer"
-                items={freezerItems}
-                onPress={() => handleOpenCompartment('freezer')}
-                isFirst={true}
-                isHighlighted={highlightedCompartment === 'freezer'}
-              />
+              <Animated.View entering={FadeInDown.duration(280).delay(60)}>
+                <CompartmentPanel
+                  compartment="freezer"
+                  name="Freezer"
+                  items={freezerItems}
+                  onPress={() => handleOpenCompartment('freezer')}
+                  isFirst={true}
+                  isHighlighted={highlightedCompartment === 'freezer'}
+                />
+              </Animated.View>
 
               {/* 6 pt Glass Divider */}
               <View style={styles.glassDivider} pointerEvents="none">
@@ -160,13 +168,15 @@ export default function FridgeScreen() {
               </View>
 
               {/* 2. Packed & Miscellaneous Compartment */}
-              <CompartmentPanel
-                compartment="packed"
-                name="Packed & Misc"
-                items={packedItems}
-                onPress={() => handleOpenCompartment('packed')}
-                isHighlighted={highlightedCompartment === 'packed'}
-              />
+              <Animated.View entering={FadeInDown.duration(280).delay(110)}>
+                <CompartmentPanel
+                  compartment="packed"
+                  name="Packed & Misc"
+                  items={packedItems}
+                  onPress={() => handleOpenCompartment('packed')}
+                  isHighlighted={highlightedCompartment === 'packed'}
+                />
+              </Animated.View>
 
               {/* 6 pt Glass Divider */}
               <View style={styles.glassDivider} pointerEvents="none">
@@ -175,20 +185,24 @@ export default function FridgeScreen() {
               </View>
 
               {/* 3. Veggies Compartment */}
-              <CompartmentPanel
-                compartment="veggies"
-                name="Veggies"
-                items={veggiesItems}
-                onPress={() => handleOpenCompartment('veggies')}
-                isHighlighted={highlightedCompartment === 'veggies'}
-              />
+              <Animated.View entering={FadeInDown.duration(280).delay(160)}>
+                <CompartmentPanel
+                  compartment="veggies"
+                  name="Veggies"
+                  items={veggiesItems}
+                  onPress={() => handleOpenCompartment('veggies')}
+                  isHighlighted={highlightedCompartment === 'veggies'}
+                />
+              </Animated.View>
 
             </View>
 
             {/* Fridge Base with Grille and Feet */}
-            <FridgeBase />
+            <Animated.View entering={FadeInDown.duration(280).delay(200)}>
+              <FridgeBase />
+            </Animated.View>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );

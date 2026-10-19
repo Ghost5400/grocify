@@ -1,6 +1,7 @@
 // src/components/EmptyState.tsx
 import React from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { CompartmentId } from '@/domain/types';
 import { compartmentTheme, radius, spacing, typography } from '@/theme/tokens';
 import { GlassShelf } from './GlassShelf';
@@ -30,7 +31,7 @@ export function EmptyState({
   return (
     <View testID={testID} style={[styles.container, style]}>
       {/* Code-drawn empty shelf illustration */}
-      <View style={styles.shelfIllustration}>
+      <Animated.View entering={FadeIn.duration(300)} style={styles.shelfIllustration}>
         {/* Faint dashed rounded outline of an item standing on shelf */}
         <View
           style={[
@@ -39,23 +40,25 @@ export function EmptyState({
           ]}
         />
         <GlassShelf insetHorizontal={24} />
-      </View>
+      </Animated.View>
 
-      <Text style={[styles.title, typography.titleMd, { color: theme.ink }]}>
-        {title}
-      </Text>
+      <Animated.View entering={FadeInDown.duration(280).delay(60)} style={styles.contentWrap}>
+        <Text style={[styles.title, typography.titleMd, { color: theme.ink }]}>
+          {title}
+        </Text>
 
-      <Text style={[styles.body, typography.body]}>
-        {body}
-      </Text>
+        <Text style={[styles.body, typography.body]}>
+          {body}
+        </Text>
 
-      <View style={styles.buttonWrapper}>
-        <PrimaryButton
-          label={buttonLabel}
-          onPress={onAddItem}
-          variant="arrow"
-        />
-      </View>
+        <View style={styles.buttonWrapper}>
+          <PrimaryButton
+            label={buttonLabel}
+            onPress={onAddItem}
+            variant="arrow"
+          />
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -66,6 +69,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.xxl,
     paddingVertical: spacing.huge,
+    width: '100%',
+  },
+  contentWrap: {
+    alignItems: 'center',
     width: '100%',
   },
   shelfIllustration: {

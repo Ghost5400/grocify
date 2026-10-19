@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BellOff, CalendarDays } from 'lucide-react-native';
 import { CompartmentIconCircle } from '@/components/CompartmentIconCircle';
 import { FridgeFrame } from '@/components/FridgeFrame';
@@ -146,18 +147,20 @@ export default function ReviewScreen() {
             bounces={false}
           >
             {/* 1. Header Pill ("Review") */}
-            <ScreenHeader
-              compartment={compartment}
-              title="Review"
-              height={56}
-              circleSize={44}
-              showBack={true}
-              onBack={handleBack}
-              style={styles.headerPill}
-            />
+            <Animated.View entering={FadeIn.duration(260)}>
+              <ScreenHeader
+                compartment={compartment}
+                title="Review"
+                height={56}
+                circleSize={44}
+                showBack={true}
+                onBack={handleBack}
+                style={styles.headerPill}
+              />
+            </Animated.View>
 
             {/* 2. Shortened Showcase Cavity (~190 pt) */}
-            <View style={styles.cavityWrapper}>
+            <Animated.View entering={FadeInDown.duration(320)} style={styles.cavityWrapper}>
               <ItemShowcaseCavity
                 compartment={compartment}
                 itemName={itemName}
@@ -165,10 +168,13 @@ export default function ReviewScreen() {
                 height={190}
                 imageSize={130}
               />
-            </View>
+            </Animated.View>
 
             {/* 3. Summary Card */}
-            <View style={[styles.summaryCard, { backgroundColor: theme.tint }]}>
+            <Animated.View
+              entering={FadeInDown.duration(300).delay(80)}
+              style={[styles.summaryCard, { backgroundColor: theme.tint }]}
+            >
               {/* 1 pt inner white border */}
               <View style={styles.cardInnerBorder} pointerEvents="none" />
 
@@ -222,11 +228,11 @@ export default function ReviewScreen() {
                   onSelect={setReminderDays}
                 />
               </View>
-            </View>
+            </Animated.View>
 
             {/* Optional Permission Denied Non-Blocking Hint */}
             {hasPromptedNotificationPermission && isPermissionGranted === false && (
-              <View style={styles.permissionNotice} testID="review-permission-hint">
+              <Animated.View entering={FadeIn.duration(240)} style={styles.permissionNotice} testID="review-permission-hint">
                 <View style={styles.permissionNoticeIconWrap}>
                   <BellOff size={16} color={colors.status.expiringSoon.fg} strokeWidth={2.2} />
                 </View>
@@ -243,11 +249,11 @@ export default function ReviewScreen() {
                 >
                   <Text style={[styles.settingsLinkText, typography.label]}>Settings</Text>
                 </TouchableOpacity>
-              </View>
+              </Animated.View>
             )}
 
             {/* 4. Action Buttons */}
-            <View style={styles.actionsContainer}>
+            <Animated.View entering={FadeInUp.duration(300).delay(120)} style={styles.actionsContainer}>
               <PrimaryButton
                 testID="review-save-btn"
                 label="Add to fridge"
@@ -260,7 +266,7 @@ export default function ReviewScreen() {
                 onPress={handleBack}
                 style={styles.editButton}
               />
-            </View>
+            </Animated.View>
           </ScrollView>
         </FridgeFrame>
       </View>

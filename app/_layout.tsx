@@ -122,7 +122,7 @@ export default function RootLayout() {
     );
 
     return () => {
-      subscription.remove();
+      subscription?.remove?.();
     };
   }, [router]);
 
@@ -149,15 +149,16 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.canvas },
           animation: 'fade',
+          animationDuration: 280,
         }}
       >
-        <Stack.Screen name="index" options={{ animation: 'fade' }} />
-        <Stack.Screen name="fridge" options={{ animation: 'fade' }} />
-        <Stack.Screen name="compartment/[id]" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="add/pick" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="add/details" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="add/review" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="_dev/gallery" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="index" options={{ animation: 'fade', animationDuration: 300 }} />
+        <Stack.Screen name="fridge" options={{ animation: 'fade', animationDuration: 300 }} />
+        <Stack.Screen name="compartment/[id]" options={{ animation: 'slide_from_right', animationDuration: 260 }} />
+        <Stack.Screen name="add/pick" options={{ animation: 'slide_from_right', animationDuration: 260 }} />
+        <Stack.Screen name="add/details" options={{ animation: 'slide_from_right', animationDuration: 260 }} />
+        <Stack.Screen name="add/review" options={{ animation: 'slide_from_right', animationDuration: 260 }} />
+        <Stack.Screen name="_dev/gallery" options={{ animation: 'slide_from_bottom', animationDuration: 280 }} />
       </Stack>
     </GestureHandlerRootView>
   );

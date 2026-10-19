@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { EmptyState } from '@/components/EmptyState';
 import { FridgeFrame } from '@/components/FridgeFrame';
 import { LightStrip } from '@/components/LightStrip';
@@ -112,12 +113,18 @@ export default function CompartmentInventoryScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Item }) => (
-      <SwipeableItemRow
-        item={item}
-        onPress={handleRowPress}
-        onDelete={handleDeletePress}
-        testID={`inventory-item-${item.id}`}
-      />
+      <Animated.View
+        entering={FadeInDown.duration(240)}
+        exiting={FadeOut.duration(180)}
+        layout={LinearTransition.duration(200)}
+      >
+        <SwipeableItemRow
+          item={item}
+          onPress={handleRowPress}
+          onDelete={handleDeletePress}
+          testID={`inventory-item-${item.id}`}
+        />
+      </Animated.View>
     ),
     [handleRowPress, handleDeletePress]
   );
@@ -142,24 +149,24 @@ export default function CompartmentInventoryScreen() {
           innerStyle={[styles.innerFrame, { backgroundColor: theme.surface }]}
         >
           {/* 1. Header Pill (72 pt) with back arrow, 52 pt icon, title, count chip, and + button */}
-          <View style={styles.headerWrapper}>
+          <Animated.View entering={FadeIn.duration(260)} style={styles.headerWrapper}>
             <InventoryHeader
               compartment={validId}
               itemCount={items.length}
               onBack={handleBack}
               onAdd={handleAdd}
             />
-          </View>
+          </Animated.View>
 
           {/* 2. Light Strip under the header */}
-          <View style={styles.lightStripWrapper}>
+          <Animated.View entering={FadeIn.duration(300).delay(50)} style={styles.lightStripWrapper}>
             <LightStrip widthPercent={70} />
-          </View>
+          </Animated.View>
 
           {/* 3. Compartment Cavity: Scrollable list of items or empty state */}
           <View style={styles.cavity}>
             {items.length === 0 ? (
-              <View style={styles.emptyContainer} testID="inventory-empty-state">
+              <Animated.View entering={FadeIn.duration(280)} style={styles.emptyContainer} testID="inventory-empty-state">
                 <EmptyState
                   compartment={validId}
                   title="Nothing here yet"
@@ -167,7 +174,7 @@ export default function CompartmentInventoryScreen() {
                   buttonLabel="Add item"
                   onAddItem={handleAdd}
                 />
-              </View>
+              </Animated.View>
             ) : (
               <FlatList
                 testID="inventory-list"

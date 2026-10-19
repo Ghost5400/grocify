@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { isBefore, parseISO, startOfDay } from 'date-fns';
 import { DateField } from '@/components/DateField';
 import { FridgeFrame } from '@/components/FridgeFrame';
@@ -83,18 +84,20 @@ export default function DetailsScreen() {
             bounces={false}
           >
             {/* 1. Header Pill (72 pt tall) with back chevron, 52 pt icon circle */}
-            <ScreenHeader
-              compartment={compartment}
-              title={`Add to ${compartmentName}`}
-              height={72}
-              circleSize={52}
-              showBack={true}
-              onBack={handleBack}
-              style={styles.headerPill}
-            />
+            <Animated.View entering={FadeIn.duration(260)}>
+              <ScreenHeader
+                compartment={compartment}
+                title={`Add to ${compartmentName}`}
+                height={72}
+                circleSize={52}
+                showBack={true}
+                onBack={handleBack}
+                style={styles.headerPill}
+              />
+            </Animated.View>
 
             {/* 2. Showcase Cavity (~258 pt) with interior light gradient, light strip, glass shelf */}
-            <View style={styles.cavityWrapper}>
+            <Animated.View entering={FadeInDown.duration(320)} style={styles.cavityWrapper}>
               <ItemShowcaseCavity
                 compartment={compartment}
                 itemName={itemName}
@@ -102,16 +105,16 @@ export default function DetailsScreen() {
                 height={258}
                 imageSize={180}
               />
-            </View>
+            </Animated.View>
 
             {/* 3. Name Pill (60 pt) with centered item name */}
-            <View style={styles.namePillWrapper}>
+            <Animated.View entering={FadeInDown.duration(280).delay(60)} style={styles.namePillWrapper}>
               <NamePill name={itemName} />
-            </View>
-
+            </Animated.View>
 
             {/* 4. Form Panel with Quantity Stepper & Expiry Date Field */}
-            <View
+            <Animated.View
+              entering={FadeInDown.duration(300).delay(110)}
               style={[
                 styles.formPanel,
                 {
@@ -149,10 +152,10 @@ export default function DetailsScreen() {
                   suggestedDays={catalogEntry?.defaultShelfLifeDays}
                 />
               </View>
-            </View>
+            </Animated.View>
 
             {/* 5. Primary Button ("Continue") */}
-            <View style={styles.buttonWrapper}>
+            <Animated.View entering={FadeInUp.duration(300).delay(150)} style={styles.buttonWrapper}>
               <PrimaryButton
                 testID="details-continue-btn"
                 label="Continue"
@@ -160,7 +163,7 @@ export default function DetailsScreen() {
                 disabled={!isValidDate}
                 onPress={handleContinue}
               />
-            </View>
+            </Animated.View>
           </ScrollView>
         </FridgeFrame>
       </View>

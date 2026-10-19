@@ -15,7 +15,10 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { ChevronLeft, Search, X } from 'lucide-react-native';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 import { FridgeFrame } from '@/components/FridgeFrame';
 import { ItemImage } from '@/components/ItemImage';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -157,7 +160,7 @@ export default function ItemPickerScreen() {
           </View>
 
           {/* Search field */}
-          <View style={styles.searchContainer}>
+          <Animated.View entering={FadeInDown.duration(260)} style={styles.searchContainer}>
             <View style={styles.searchField}>
               <Search
                 size={22}
@@ -189,7 +192,7 @@ export default function ItemPickerScreen() {
                 </TouchableOpacity>
               )}
             </View>
-          </View>
+          </Animated.View>
 
           {/* 3-Column Item Grid */}
           <FlatList
@@ -201,12 +204,13 @@ export default function ItemPickerScreen() {
             contentContainerStyle={styles.gridContent}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-              <Pressable
+              <AnimatedPressable
+                entering={FadeIn.duration(200)}
                 testID={`picker-tile-${item.id}`}
                 onPress={() => handleSelectItem(item)}
                 accessibilityRole="button"
                 accessibilityLabel={`Select ${item.name}`}
-                style={({ pressed }) => [
+                style={({ pressed }: { pressed: boolean }) => [
                   styles.tile,
                   elevation.elev1,
                   {
@@ -239,7 +243,7 @@ export default function ItemPickerScreen() {
                 >
                   {item.name}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             )}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>

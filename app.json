@@ -52,7 +52,10 @@
           "color": "#4A7753",
           "defaultChannel": "expiry-reminders"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-status-bar"
     ]
   }
 }

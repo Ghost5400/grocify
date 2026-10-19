@@ -42,6 +42,7 @@ export function ItemImage({
     <ItemImagePlaceholder
       name={name}
       compartment={compartment}
+      catalogId={catalogId}
       size={size}
       style={style}
     />

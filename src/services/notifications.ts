@@ -10,14 +10,16 @@ import { daysLeft } from '../domain/status';
 export const ANDROID_EXPIRY_CHANNEL_ID = 'expiry-reminders';
 
 // 1. Configure foreground notification presentation handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 /**
  * Ensures the Android notification channel exists.
@@ -38,7 +40,9 @@ export async function setupAndroidChannel(): Promise<void> {
 }
 
 // Automatically attempt channel setup on module initialization
-setupAndroidChannel().catch(() => {});
+if (Platform.OS === 'android') {
+  setupAndroidChannel().catch(() => {});
+}
 
 /**
  * Formats notification body copy from item name and target trigger date per TRD 8 and 7.1.

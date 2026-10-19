@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
@@ -26,6 +26,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
+  const pathname = usePathname();
   const hydrated = useFridgeStore((state) => state.hydrated);
   const hasSeenWelcome = useFridgeStore((state) => state.settings.hasSeenWelcome);
   const reconcileNotifications = useFridgeStore((state) => state.reconcileNotifications);
@@ -39,6 +40,44 @@ export default function RootLayout() {
   });
 
   const isReady = fontsLoaded && hydrated;
+
+  // On Web, automatically blur focused descendants when routes change or when ancestors receive aria-hidden="true"
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'aria-hidden'
+        ) {
+          const target = mutation.target as HTMLElement;
+          if (
+            target &&
+            target.getAttribute('aria-hidden') === 'true' &&
+            document.activeElement &&
+            target.contains(document.activeElement)
+          ) {
+            (document.activeElement as HTMLElement)?.blur?.();
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['aria-hidden'],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (isReady) {

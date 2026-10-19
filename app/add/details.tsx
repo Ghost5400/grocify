@@ -146,6 +146,7 @@ export default function DetailsScreen() {
                   placeholder="DD / MM / YYYY"
                   error={isPastDate ? 'Pick today or a later date' : false}
                   helperText="We'll remind you before it expires."
+                  suggestedDays={catalogEntry?.defaultShelfLifeDays}
                 />
               </View>
             </View>

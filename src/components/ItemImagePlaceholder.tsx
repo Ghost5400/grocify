@@ -1,14 +1,15 @@
 // src/components/ItemImagePlaceholder.tsx
-// Fallback placeholder rendering the first letter of the item in its compartment tint.
+// Renders the food item's authentic emoji (e.g. 🍅 for Tomato) in place of cutout images.
 
 import React from 'react';
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { CompartmentId } from '../domain/types';
-import { compartmentTheme, fontNames, radius } from '../theme/tokens';
+import { getItemEmoji } from '../data/itemEmojis';
 
-interface ItemImagePlaceholderProps {
+export interface ItemImagePlaceholderProps {
   name: string;
   compartment?: CompartmentId;
+  catalogId?: string;
   size?: number;
   style?: StyleProp<ViewStyle>;
 }
@@ -16,12 +17,13 @@ interface ItemImagePlaceholderProps {
 export const ItemImagePlaceholder: React.FC<ItemImagePlaceholderProps> = ({
   name,
   compartment = 'veggies',
+  catalogId,
   size = 64,
   style,
 }) => {
-  const theme = compartmentTheme[compartment];
-  const initial = (name.trim().charAt(0) || '?').toUpperCase();
-  const fontSize = Math.max(14, Math.round(size * 0.42));
+  const emoji = getItemEmoji(catalogId || name, compartment);
+  // Scale emoji nicely relative to container size
+  const fontSize = Math.max(16, Math.round(size * 0.7));
 
   return (
     <View
@@ -30,28 +32,35 @@ export const ItemImagePlaceholder: React.FC<ItemImagePlaceholderProps> = ({
         {
           width: size,
           height: size,
-          backgroundColor: theme.tint,
-          borderColor: theme.accent,
         },
         style,
       ]}
       accessibilityRole="image"
-      accessibilityLabel={`Placeholder image for ${name}`}
+      accessibilityLabel={`Image for ${name}`}
     >
-      <Text style={[styles.letter, { color: theme.ink, fontSize }]}>{initial}</Text>
+      <Text
+        style={[
+          styles.emoji,
+          {
+            fontSize,
+            lineHeight: Platform.OS === 'ios' ? Math.round(fontSize * 1.15) : undefined,
+          },
+        ]}
+      >
+        {emoji}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: radius.md,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
-  letter: {
-    fontFamily: fontNames.bold,
+  emoji: {
     textAlign: 'center',
+    includeFontPadding: false,
   },
 });
